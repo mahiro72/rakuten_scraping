@@ -3,6 +3,7 @@
 コマンドプロンプトで
 
 pip install pandas
+
 pip install selenium
 
 これでpandasとseleniumを入れる
