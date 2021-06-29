@@ -1,26 +1,25 @@
 import os
-from typing import Tuple
-import selenium
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 import pandas as pd
-import re
 from dotenv import load_dotenv
 import datetime
+import time
+import random
 
 load_dotenv()
 
 # browser start
-options = Options()
+option = Options()
+option.add_argument('--headless')
 executable_path = os.environ.get('DRIVER_PATH')
-driver = webdriver.Chrome(executable_path=executable_path)
+driver = webdriver.Chrome(executable_path=executable_path,options=option)
 
-url = "https://travel.rakuten.co.jp/HOTEL/149164/review.html"
 
-col_name = ["総合評価","投稿日時","投稿本文","目的","同伴者","回答本文","プランタイトル","部屋種類"]
+col_name = ["総合評価","投稿日時","投稿本文","目的","同伴者","回答本文","施設ID"]
 test_csv = pd.DataFrame(columns=col_name)
 
 check_date = datetime.datetime(year=2019,month=12,day=1)
@@ -54,8 +53,13 @@ def scraping_start(p,num):
     ne = True
     driver.get(p)
 
+
     if not check('#RthNameArea > h2 > a'):
         return
+    
+    if driver.find_element_by_css_selector('#htlBrdCrmbs > a:nth-child(1)').text=="海外旅行":
+        return
+    
 
     cnt = len(driver.find_elements_by_css_selector('#commentArea > div'))
     dict = {}
@@ -89,19 +93,26 @@ def scraping_start(p,num):
         url = driver.find_element_by_css_selector('#primary > div:nth-child(5) > ul > li.pagingNext > a').get_attribute("href")
         scraping_start(url,num)
 
-    return False
+    return 
+
+
+
+
+data = pd.read_table(r"C:\Users\mahir\デスクトップ\ジョイリデータ\data\travel_20200131\02_Travel_HotelMaster.tsv\02_Travel_HotelMaster.tsv")
+id_list = set()
+while len(id_list)<3000:
+    id_list.add(random.choice(data["施設ID"].unique()))
+
+
+for i,num in enumerate(list(id_list)): 
+    print('%d 番目(id: %d)' % (i+1,num))
+    url = 'https://review.travel.rakuten.co.jp/hotel/voice/'+str(num)
+    scraping_start(url,num)
     
-
-
-for i in range(89,100):  # 35000
-    url = 'https://review.travel.rakuten.co.jp/hotel/voice/'+str(i)
-    scraping_start(url,i)
     
 
 
 driver.quit()
-
-# print(test_csv)
 
 test_csv.to_csv("test_csv.csv",index=False)
 
