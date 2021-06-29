@@ -66,7 +66,6 @@ def scraping_start(p,num):
         try:
             date  =driver.find_element_by_css_selector('#commentArea > div:nth-child('+str(i)+') > div.commentReputationBoth > dl.commentReputation > dt > span.time').text
             date = date_shaping(date)
-
             if check_date>date:
                 ne = False
                 continue
@@ -83,20 +82,21 @@ def scraping_start(p,num):
             test_csv = test_csv.append(dict,ignore_index=True)
 
         except:
+            ne=False
             pass
     
     if ne and check('#primary > div:nth-child(5) > ul > li.pagingNext > a'):
-        driver.find_element_by_css_selector('#primary > div:nth-child(5) > ul > li.pagingNext > a').click
-        return True
+        url = driver.find_element_by_css_selector('#primary > div:nth-child(5) > ul > li.pagingNext > a').get_attribute("href")
+        scraping_start(url,num)
 
     return False
     
 
 
-for i in range(1,100):  # 35000
+for i in range(89,100):  # 35000
     url = 'https://review.travel.rakuten.co.jp/hotel/voice/'+str(i)
-    while scraping_start(url,i):
-        pass
+    scraping_start(url,i)
+    
 
 
 driver.quit()
