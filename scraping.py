@@ -49,6 +49,7 @@ def date_shaping(text):
 
 def scraping_start(p,num):
     global test_csv
+    time.sleep(2)
 
     ne = True
     driver.get(p)
@@ -100,17 +101,20 @@ def scraping_start(p,num):
 
 data = pd.read_table(r"C:\Users\mahir\デスクトップ\ジョイリデータ\data\travel_20200131\02_Travel_HotelMaster.tsv\02_Travel_HotelMaster.tsv")
 id_list = set()
-while len(id_list)<3000:
+while len(id_list)<10000:
     id_list.add(random.choice(data["施設ID"].unique()))
 
 
 for i,num in enumerate(list(id_list)): 
     print('%d 番目(id: %d)' % (i+1,num))
     url = 'https://review.travel.rakuten.co.jp/hotel/voice/'+str(num)
-    scraping_start(url,num)
     
+    try:
+        scraping_start(url,num)
+    except:
+        print('%d 番目(id: %d) エラーが発生しました。' % (i+1,num))
+        pass
     
-
 
 driver.quit()
 
